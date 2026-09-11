@@ -1,6 +1,6 @@
 {
   "name": "macos-haptics",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native macOS trackpad haptic feedback for Node.js",
   "author": "Eliott Vincent <dev@eliottvincent.com>",
   "main": "index.js",
