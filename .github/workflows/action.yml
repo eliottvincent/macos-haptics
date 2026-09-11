@@ -122,5 +122,3 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           npm publish macos-haptics-*.tgz --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
