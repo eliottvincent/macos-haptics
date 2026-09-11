@@ -28,11 +28,11 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Node
         id: install_node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24.x"
           cache: npm
@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload binding
         id: upload_binding
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: binding-${{ matrix.arch }}
           path: native/build/Release/macos_haptics.node
@@ -64,7 +64,7 @@ jobs:
           retention-days: 7
 
   package:
-    name: Creates universal package and publishes tagged versions
+    name: Publish
     needs: build
     runs-on: macos-15
 
@@ -75,25 +75,25 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Node
         id: install_node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "24.x"
           registry-url: "https://registry.npmjs.org"
 
       - name: Download arm64 binding
         id: download_arm64_binding
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: binding-arm64
           path: artifacts/arm64
 
       - name: Download x64 binding
         id: download_x64_binding
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: binding-x64
           path: artifacts/x64
