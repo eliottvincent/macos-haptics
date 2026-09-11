@@ -1,0 +1,122 @@
+name: Build & Publish
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Builds ${{ matrix.arch }} binding
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            lipo_arch: arm64
+            os: macos-15
+          - arch: x64
+            lipo_arch: x86_64
+            os: macos-15-intel
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        id: install_node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: npm
+
+      - name: Install dependencies
+        id: install_dependencies
+        run: |
+          npm install
+
+      - name: Build
+        id: build
+        run: |
+          npm run build
+
+      - name: Verify architecture
+        id: verify_architecture
+        run: |
+          test "$(node -p process.arch)" = "${{ matrix.arch }}"
+          lipo native/build/Release/macos_haptics.node \
+            -verify_arch "${{ matrix.lipo_arch }}"
+
+      - name: Upload binding
+        id: upload_binding
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-${{ matrix.arch }}
+          path: native/build/Release/macos_haptics.node
+          if-no-files-found: error
+          retention-days: 7
+
+  package:
+    name: Creates universal package and publishes tagged versions
+    needs: build
+    runs-on: macos-15
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        id: install_node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download arm64 binding
+        id: download_arm64_binding
+        uses: actions/download-artifact@v4
+        with:
+          name: binding-arm64
+          path: artifacts/arm64
+
+      - name: Download x64 binding
+        id: download_x64_binding
+        uses: actions/download-artifact@v4
+        with:
+          name: binding-x64
+          path: artifacts/x64
+
+      - name: Create universal binding
+        id: create_universal_binding
+        run: |
+          mkdir -p prebuilds
+          lipo -create \
+            artifacts/arm64/macos_haptics.node \
+            artifacts/x64/macos_haptics.node \
+            -output prebuilds/macos-haptics.node
+
+      - name: Verify universal binding
+        id: verify_universal_binding
+        run: |
+          lipo prebuilds/macos-haptics.node -verify_arch arm64 x86_64
+
+      - name: Create package
+        id: create_package
+        run: |
+          npm pack
+
+      - name: Publish
+        id: publish
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          npm publish macos-haptics-*.tgz --access public
