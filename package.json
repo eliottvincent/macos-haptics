@@ -1,0 +1,48 @@
+{
+  "name": "macos-haptics",
+  "version": "1.0.0",
+  "description": "Native macOS trackpad haptic feedback for Node.js",
+  "author": "Eliott Vincent <dev@eliottvincent.com>",
+  "main": "index.js",
+  "homepage": "https://github.com/eliottvincent/macos-haptics",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/eliottvincent/macos-haptics"
+  },
+  "bugs": {
+    "url": "https://github.com/eliottvincent/macos-haptics/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64",
+    "x64"
+  ],
+  "files": [
+    "index.js",
+    "prebuilds/macos-haptics.node"
+  ],
+  "scripts": {
+    "build": "node-gyp rebuild --directory native",
+    "clean": "node-gyp clean --directory native"
+  },
+  "devDependencies": {
+    "node-gyp": "12.4.0"
+  },
+  "keywords": [
+    "apple",
+    "haptic",
+    "haptics",
+    "mac",
+    "macos",
+    "native",
+    "node",
+    "taptic",
+    "trackpad"
+  ],
+  "license": "MIT"
+}
